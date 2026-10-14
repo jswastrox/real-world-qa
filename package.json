@@ -1,0 +1,35 @@
+{
+  "name": "real-world-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Estratégia de qualidade e automação de testes (E2E, API e acessibilidade) de um SaaS de consulta veicular em produção — Playwright + TypeScript.",
+  "scripts": {
+    "test": "playwright test --project=setup --project=desktop --project=mobile --project=api --project=a11y",
+    "test:e2e": "playwright test --project=setup --project=desktop --project=mobile",
+    "test:api": "playwright test --project=api",
+    "test:a11y": "playwright test --project=a11y",
+    "test:cross-browser": "playwright test --project=setup --project=firefox --project=webkit",
+    "test:headed": "playwright test --project=setup --project=desktop --headed",
+    "test:ui": "playwright test --ui",
+    "test:list": "playwright test --list",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jswastrox/real-world-qa.git"
+  },
+  "author": "Jonathan dos Santos",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "dotenv": "^18.0.7",
+    "typescript": "^7.0.2",
+    "zod": "^4.6.7"
+  }
+}

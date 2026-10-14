@@ -1,0 +1,68 @@
+name: QA — execução sob demanda
+
+# Os testes rodam contra produção. Execução apenas manual (ver docs/adr/0002).
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Conjunto de testes
+        type: choice
+        default: completa
+        options:
+          - completa
+          - smoke
+          - cross-browser
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-producao
+  cancel-in-progress: false
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+      BASE_URL: https://placaveicular.online
+      API_URL: https://api.apiveicular.online
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Checagem de tipos
+        run: npm run typecheck
+
+      - name: Instalar navegadores
+        run: |
+          if [ "${{ inputs.suite }}" = "cross-browser" ]; then
+            npx playwright install --with-deps chromium firefox webkit
+          else
+            npx playwright install --with-deps chromium
+          fi
+
+      - name: Executar testes
+        run: |
+          case "${{ inputs.suite }}" in
+            smoke)         npx playwright test --project=setup --project=desktop --grep @smoke ;;
+            cross-browser) npm run test:cross-browser ;;
+            *)             npm test ;;
+          esac
+
+      - name: Publicar relatório como artefato
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
